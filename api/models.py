@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class StreamModel(models.Model):
     name = models.CharField(max_length=255)
@@ -19,6 +20,7 @@ class WatchModel(models.Model):
 
 class ReviewModel(models.Model):
     rating = models.PositiveIntegerField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     description = models.TextField()
     watchlist = models.ForeignKey(WatchModel, on_delete=models.CASCADE, related_name='review')
     active = models.BooleanField(default=True)

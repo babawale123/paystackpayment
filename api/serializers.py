@@ -2,10 +2,12 @@ from rest_framework import serializers
 from .models import StreamModel,WatchModel,ReviewModel
 
 class ReviewSerializer(serializers.ModelSerializer):
+    movie_name = serializers.ReadOnlyField(source="watchlist.title")
+    user = serializers.StringRelatedField()
 
     class Meta:
         model = ReviewModel
-        fields = "__all__"
+        exclude = ('watchlist',)
 
 
 class WatchSerializer(serializers.ModelSerializer):

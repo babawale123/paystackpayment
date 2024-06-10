@@ -1,10 +1,10 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-
+from rest_framework import generics
+from rest_framework.exceptions import ValidationError
 from .models import StreamModel,WatchModel,ReviewModel
 from .serializers import StreamSerializer,WatchSerializer,ReviewSerializer
-from rest_framework import generics
 
 class StreamList(APIView):
     def post(self, request):
@@ -93,7 +93,29 @@ class WatchDetails(APIView):
 
 class ReviewList(generics.ListAPIView):
     serializer_class = ReviewSerializer
-    queryset = ReviewModel.objects.all()
+    
+    def get_queryset(self):
+        pk = self.kwargs['pk']
+        return ReviewModel.objects.filter(watchlist=pk)
+    
+class ReviewCreate(generics.CreateAPIView):
+    serializer_class = ReviewSerializer
+
+    def get_queryset(self):
+        return ReviewModel.objects.all()
+
+    def perform_create(self,serializer):
+        pk = self.kwargs.get('pk')
+        watchlist = WatchModel.objects.get(pk=pk)
+
+        user = self.request.user
+        queryset = ReviewModel.objects.filter(watchlist=watchlist,user=user)
+
+        if queryset.exists():
+            raise ValidationError('you have made a review already')
+
+        serializer.save(watchlist=watchlist,user=user)
+
     
 
 
